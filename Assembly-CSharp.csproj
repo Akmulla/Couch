@@ -45,11 +45,11 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-     <Compile Include="Assets\Scripts\ContinueText.cs" />
-     <Compile Include="Assets\Scripts\Couch.cs" />
-     <Compile Include="Assets\Scripts\CouchMove.cs" />
-     <Compile Include="Assets\Scripts\Edges.cs" />
-     <Compile Include="Assets\Scripts\Score.cs" />
+     <Compile Include="Assets\CouchPackage\Scripts\ContinueText.cs" />
+     <Compile Include="Assets\CouchPackage\Scripts\Couch.cs" />
+     <Compile Include="Assets\CouchPackage\Scripts\CouchMove.cs" />
+     <Compile Include="Assets\CouchPackage\Scripts\Edges.cs" />
+     <Compile Include="Assets\CouchPackage\Scripts\Score.cs" />
  <Reference Include="UnityEngine.UI">
  <HintPath>D:/Unity/Editor/Data/UnityExtensions/Unity/GUISystem/UnityEngine.UI.dll</HintPath>
  </Reference>

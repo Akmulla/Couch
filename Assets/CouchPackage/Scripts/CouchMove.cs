@@ -8,17 +8,18 @@ public class CouchMove : MonoBehaviour
     delegate void UpdateDelegate();
     UpdateDelegate[] updateDelegates;
     float topTargetPosition;
-    float leftTargetPosition;
+    float sideTargetPosition;
+    bool leftSide;
     float width;
     float height;
     Vector2 center;
+    Sprite sprite;
 
     //bool rot = false;
     // Use this for initialization
     void Start()
     {
-        
-
+        sprite = GetComponent<SpriteRenderer>().sprite;
 
         updateDelegates = new UpdateDelegate[(int)Couch.movePhase.Count];
         //rb = GetComponent<Rigidbody2D>();
@@ -57,20 +58,27 @@ public class CouchMove : MonoBehaviour
     }
     void Reset()
     {
+        leftSide = Random.value > 0.5f ? true : false; 
 
         ContinueText.continueComponent.EnableText(false);
         //Debug.Log("Reset");
         float scale = Random.Range(0.6f, 1.2f);
         transform.localScale = new Vector3(scale, scale,1.0f);
 
-        Sprite sprite = GetComponent<SpriteRenderer>().sprite;
         width = sprite.bounds.extents.x * transform.localScale.x;
         height = sprite.bounds.extents.y * transform.localScale.y;
 
         topTargetPosition = Edges.topEdge - width;
-        leftTargetPosition = Edges.leftEdge + height;
-        //Debug.Log(targetPosition);
-        transform.position = new Vector2(Edges.rightEdge - width, Edges.botEdge+height);
+        if (leftSide)
+        {
+            sideTargetPosition = Edges.leftEdge + height;
+            transform.position = new Vector2(Edges.rightEdge - width, Edges.botEdge + height);
+        }
+        else
+        {
+            sideTargetPosition = Edges.rightEdge - height;
+            transform.position = new Vector2(Edges.leftEdge + width, Edges.botEdge + height);
+        }
         transform.rotation = Quaternion.identity;
         Couch.phase = Couch.movePhase.Idle;
     }
@@ -89,45 +97,26 @@ public class CouchMove : MonoBehaviour
         {
             if ((Input.GetTouch(0).phase == TouchPhase.Canceled) || (Input.GetTouch(0).phase == TouchPhase.Ended))
             {
-                center = new Vector2(Edges.leftEdge+height, transform.position.y);
+                center = new Vector2(leftSide ? Edges.leftEdge+height : Edges.rightEdge - height, 
+                    transform.position.y);
                 Couch.phase = Couch.movePhase.Rotate;
                 //rb.velocity = Vector2.zero;
             }
         }
         if (transform.position.y > Edges.topEdge)
             Couch.phase = Couch.movePhase.Overcome;
-        //    rb.velocity = Vector2.up * speed;
-        //if (Input.touchCount > 0)
-        //{
-        //    if ((Input.GetTouch(0).phase == TouchPhase.Canceled) || (Input.GetTouch(0).phase == TouchPhase.Ended))
-        //    {
-        //        Couch.phase = Couch.movePhase.Rotate;
-        //        rb.velocity = Vector2.zero;
-        //    }
-        //}
     }
     void Rotate()
-    {
-        //float angle = Mathf.LerpAngle(0.0f, 90.0f, 1.0f);
-        //transform.rotation = Quaternion.Euler(0.0f, 0.0f, angle);
-        //transform.position = Vector2.Lerp(transform.position,
-        //    new Vector2(leftTargetPosition, transform.position.y), 0.1f);
-
-        transform.RotateAround(center, Vector3.forward, 5.0f);
-        if (transform.rotation.eulerAngles.z > 89.0f)
+    { 
+        transform.RotateAround(center, Vector3.forward, leftSide? 5.0f : -5.0f);
+        if (leftSide ? (transform.rotation.eulerAngles.z > 89.0f) : (transform.rotation.eulerAngles.z < 271.0f))
         {
             Couch.phase = Couch.movePhase.Finish;
         }
-        //if ((Mathf.Abs(transform.position.x - leftTargetPosition) < 0.1f)&&
-        //    (Mathf.Abs(transform.rotation.eulerAngles.z - 90.0f) < 1.0f))
-        //{
-        //    Couch.phase = Couch.movePhase.Finish;
-        //}
     }
     void Finish()
     {
-        //rb.velocity = Vector2.zero;
-
+        Debug.Log(topTargetPosition - transform.position.y);
         if (Mathf.Abs(topTargetPosition - transform.position.y)<0.25f)
         {
             Score.scoreComponent.IncreaseScore(1);
@@ -137,7 +126,6 @@ public class CouchMove : MonoBehaviour
             Score.scoreComponent.ResetScore();
         }
         Couch.phase = Couch.movePhase.FinishIdle;
-       //Debug.Log("Finish");
     }
     void FinishIdle()
     {
@@ -156,16 +144,4 @@ public class CouchMove : MonoBehaviour
         Couch.phase = Couch.movePhase.Reset;
         Score.scoreComponent.ResetScore();
     }
-    //void OnTriggerExit2D(Collider2D other)
-    //{
-    //    Couch.phase = Couch.movePhase.Hit;
-    //}
-    //void OnTriggerEnter2D(Collider2D other)
-    //{
-    //    Couch.phase = Couch.movePhase.Hit;
-    //}
-    //void OnCollisionEnter2D(Collision2D coll)
-    //{
-    //    Couch.phase = Couch.movePhase.Hit;
-    //}
 }
