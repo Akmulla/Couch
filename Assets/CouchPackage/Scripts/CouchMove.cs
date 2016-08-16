@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.Advertisements;
 
 public class CouchMove : MonoBehaviour
 {
@@ -8,12 +9,14 @@ public class CouchMove : MonoBehaviour
     delegate void UpdateDelegate();
     UpdateDelegate[] updateDelegates;
     float topTargetPosition;
-    float sideTargetPosition;
+    //float sideTargetPosition;
     bool leftSide;
     float width;
     float height;
     Vector2 center;
     Sprite sprite;
+
+    public GameObject menu;
 
     //bool rot = false;
     // Use this for initialization
@@ -23,6 +26,7 @@ public class CouchMove : MonoBehaviour
 
         updateDelegates = new UpdateDelegate[(int)Couch.movePhase.Count];
         //rb = GetComponent<Rigidbody2D>();
+        updateDelegates[(int)Couch.movePhase.Menu] = Menu;
         updateDelegates[(int)Couch.movePhase.Reset] = Reset;
         updateDelegates[(int)Couch.movePhase.Idle] = Idle;
         updateDelegates[(int)Couch.movePhase.MoveUp] = MoveUp;
@@ -56,8 +60,15 @@ public class CouchMove : MonoBehaviour
 
 
     }
+
+    void Menu()
+    {
+        //menu.SetActive(true);
+    }
     void Reset()
     {
+        //menu.SetActive(false);
+        //AdsSystem.Instance.Init();
         leftSide = Random.value > 0.5f ? true : false; 
 
         ContinueText.continueComponent.EnableText(false);
@@ -71,12 +82,12 @@ public class CouchMove : MonoBehaviour
         topTargetPosition = Edges.topEdge - width;
         if (leftSide)
         {
-            sideTargetPosition = Edges.leftEdge + height;
+            //sideTargetPosition = Edges.leftEdge + height;
             transform.position = new Vector2(Edges.rightEdge - width, Edges.botEdge + height);
         }
         else
         {
-            sideTargetPosition = Edges.rightEdge - height;
+            //sideTargetPosition = Edges.rightEdge - height;
             transform.position = new Vector2(Edges.leftEdge + width, Edges.botEdge + height);
         }
         transform.rotation = Quaternion.identity;
@@ -84,7 +95,7 @@ public class CouchMove : MonoBehaviour
     }
     void Idle()
     {
-        if (Input.touchCount > 0)
+        if ((Input.touchCount > 0)&&(!Advertisement.isShowing))
         {
             if (Input.GetTouch(0).phase == TouchPhase.Began)
                 Couch.phase = Couch.movePhase.MoveUp;
@@ -116,16 +127,17 @@ public class CouchMove : MonoBehaviour
     }
     void Finish()
     {
-        Debug.Log(topTargetPosition - transform.position.y);
         if (Mathf.Abs(topTargetPosition - transform.position.y)<0.25f)
         {
             Score.scoreComponent.IncreaseScore(1);
         }
         else
         {
+            Score.scoreComponent.Finish();
             Score.scoreComponent.ResetScore();
         }
         Couch.phase = Couch.movePhase.FinishIdle;
+
     }
     void FinishIdle()
     {
@@ -136,6 +148,7 @@ public class CouchMove : MonoBehaviour
             {
                 ContinueText.continueComponent.EnableText(false);
                 Couch.phase = Couch.movePhase.Reset;
+                Score.scoreComponent.Continue();
             }
         }
     }

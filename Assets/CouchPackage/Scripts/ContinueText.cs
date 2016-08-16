@@ -9,6 +9,7 @@ public class ContinueText : MonoBehaviour
     void Awake ()
     {
         continueComponent = this;
+        gameObject.SetActive(false);
     }
 	
 	public void EnableText(bool isEnabled)

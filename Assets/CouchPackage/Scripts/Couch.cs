@@ -3,7 +3,7 @@ using System.Collections;
 
 public class Couch : MonoBehaviour
 {
-    public enum movePhase { Reset,Idle, MoveUp, Rotate, Finish,FinishIdle,Overcome,Count };
+    public enum movePhase {Menu, Reset,Idle, MoveUp, Rotate, Finish,FinishIdle,Overcome,Count };
     public static GameObject couch;
     public static movePhase phase;
 
