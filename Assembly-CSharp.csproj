@@ -45,10 +45,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+     <Compile Include="Assets\CouchPackage\Scripts\Ads.cs" />
      <Compile Include="Assets\CouchPackage\Scripts\ContinueText.cs" />
      <Compile Include="Assets\CouchPackage\Scripts\Couch.cs" />
      <Compile Include="Assets\CouchPackage\Scripts\CouchMove.cs" />
      <Compile Include="Assets\CouchPackage\Scripts\Edges.cs" />
+     <Compile Include="Assets\CouchPackage\Scripts\ManMove.cs" />
      <Compile Include="Assets\CouchPackage\Scripts\SaveLoad.cs" />
      <Compile Include="Assets\CouchPackage\Scripts\Score.cs" />
      <Compile Include="Assets\CouchPackage\Scripts\StartGame.cs" />

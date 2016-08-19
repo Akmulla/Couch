@@ -5,7 +5,8 @@ using UnityEngine.Advertisements;
 public class CouchMove : MonoBehaviour
 {
     //Rigidbody2D rb;
-    [SerializeField] float speed;
+    [SerializeField] float baseSpeed;
+    float speed;
     delegate void UpdateDelegate();
     UpdateDelegate[] updateDelegates;
     float topTargetPosition;
@@ -15,13 +16,16 @@ public class CouchMove : MonoBehaviour
     float height;
     Vector2 center;
     Sprite sprite;
+    public GameObject man;
+    Animator anim;
 
-    public GameObject menu;
+    //public GameObject menu;
 
     //bool rot = false;
     // Use this for initialization
     void Start()
     {
+        anim = man.GetComponent<Animator>();
         sprite = GetComponent<SpriteRenderer>().sprite;
 
         updateDelegates = new UpdateDelegate[(int)Couch.movePhase.Count];
@@ -67,6 +71,9 @@ public class CouchMove : MonoBehaviour
     }
     void Reset()
     {
+        
+        anim.SetBool("Move", false);
+        Ads.ads.Increase();
         //menu.SetActive(false);
         //AdsSystem.Instance.Init();
         leftSide = Random.value > 0.5f ? true : false; 
@@ -75,7 +82,8 @@ public class CouchMove : MonoBehaviour
         //Debug.Log("Reset");
         float scale = Random.Range(0.6f, 1.2f);
         transform.localScale = new Vector3(scale, scale,1.0f);
-
+        //man.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
+        speed = baseSpeed * scale;
         width = sprite.bounds.extents.x * transform.localScale.x;
         height = sprite.bounds.extents.y * transform.localScale.y;
 
@@ -91,6 +99,7 @@ public class CouchMove : MonoBehaviour
             transform.position = new Vector2(Edges.leftEdge + width, Edges.botEdge + height);
         }
         transform.rotation = Quaternion.identity;
+        //MoveMan();
         Couch.phase = Couch.movePhase.Idle;
     }
     void Idle()
@@ -103,6 +112,7 @@ public class CouchMove : MonoBehaviour
     }
     void MoveUp()
     {
+        anim.SetBool("Move", true);
         transform.Translate(Vector2.up * Time.deltaTime * speed);
         if (Input.touchCount > 0)
         {
@@ -114,12 +124,14 @@ public class CouchMove : MonoBehaviour
                 //rb.velocity = Vector2.zero;
             }
         }
+        //MoveMan();
         if (transform.position.y > Edges.topEdge)
             Couch.phase = Couch.movePhase.Overcome;
     }
     void Rotate()
     { 
         transform.RotateAround(center, Vector3.forward, leftSide? 5.0f : -5.0f);
+        //MoveMan();
         if (leftSide ? (transform.rotation.eulerAngles.z > 89.0f) : (transform.rotation.eulerAngles.z < 271.0f))
         {
             Couch.phase = Couch.movePhase.Finish;
@@ -127,6 +139,7 @@ public class CouchMove : MonoBehaviour
     }
     void Finish()
     {
+        anim.SetBool("Move", false);
         if (Mathf.Abs(topTargetPosition - transform.position.y)<0.25f)
         {
             Score.scoreComponent.IncreaseScore(1);
@@ -156,5 +169,11 @@ public class CouchMove : MonoBehaviour
     {
         Couch.phase = Couch.movePhase.Reset;
         Score.scoreComponent.ResetScore();
+    }
+
+    void MoveMan()
+    {
+        man.transform.position = transform.position - new Vector3(0.0f, height,0.0f);
+        man.transform.rotation = transform.rotation;
     }
 }
