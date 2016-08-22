@@ -15,7 +15,7 @@ public class CouchMove : MonoBehaviour
     float width;
     float height;
     Vector2 center;
-    Sprite sprite;
+    
     public GameObject man;
     Animator anim;
 
@@ -26,7 +26,6 @@ public class CouchMove : MonoBehaviour
     void Start()
     {
         anim = man.GetComponent<Animator>();
-        sprite = GetComponent<SpriteRenderer>().sprite;
 
         updateDelegates = new UpdateDelegate[(int)Couch.movePhase.Count];
         //rb = GetComponent<Rigidbody2D>();
@@ -38,6 +37,9 @@ public class CouchMove : MonoBehaviour
         updateDelegates[(int)Couch.movePhase.Finish] = Finish;
         updateDelegates[(int)Couch.movePhase.FinishIdle] = FinishIdle;
         updateDelegates[(int)Couch.movePhase.Overcome] = Overcome;
+
+        Reset();
+        Couch.phase = Couch.movePhase.Idle;
     }
 
     protected void OnDestroy()
@@ -57,6 +59,7 @@ public class CouchMove : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //Debug.Log(Couch.phase);
         if (updateDelegates[(int)Couch.phase] != null)
         {
             updateDelegates[(int)Couch.phase]();
@@ -74,32 +77,30 @@ public class CouchMove : MonoBehaviour
         
         anim.SetBool("Move", false);
         Ads.ads.Increase();
-        //menu.SetActive(false);
-        //AdsSystem.Instance.Init();
         leftSide = Random.value > 0.5f ? true : false; 
 
         ContinueText.continueComponent.EnableText(false);
-        //Debug.Log("Reset");
         float scale = Random.Range(0.6f, 1.2f);
-        transform.localScale = new Vector3(scale, scale,1.0f);
-        //man.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
-        speed = baseSpeed * scale;
-        width = sprite.bounds.extents.x * transform.localScale.x;
-        height = sprite.bounds.extents.y * transform.localScale.y;
+        Couch.couch.transform.localScale = new Vector3(scale, scale,1.0f);
+        speed = baseSpeed / scale;
 
-        topTargetPosition = Edges.topEdge - width;
+        width = Couch.sprite.bounds.extents.x * Couch.couch.transform.localScale.x;
+        height = Couch.sprite.bounds.extents.y * Couch.couch.transform.localScale.y;
+
+
+        man.transform.localPosition = new Vector3(0.0f, -height, 0.0f);
+        Couch.couch.transform.localPosition = Vector3.zero;
+        //topTargetPosition = Edges.topEdge - width;
+        topTargetPosition = Chair.chair.SetChairPosition(width, leftSide);
         if (leftSide)
         {
-            //sideTargetPosition = Edges.leftEdge + height;
             transform.position = new Vector2(Edges.rightEdge - width, Edges.botEdge + height);
         }
         else
         {
-            //sideTargetPosition = Edges.rightEdge - height;
             transform.position = new Vector2(Edges.leftEdge + width, Edges.botEdge + height);
         }
         transform.rotation = Quaternion.identity;
-        //MoveMan();
         Couch.phase = Couch.movePhase.Idle;
     }
     void Idle()
@@ -129,7 +130,9 @@ public class CouchMove : MonoBehaviour
             Couch.phase = Couch.movePhase.Overcome;
     }
     void Rotate()
-    { 
+    {
+        //if (Couch.sprite.bounds.Intersects(Chair.chairBox))
+        //Couch.phase = Couch.movePhase.Overcome;
         transform.RotateAround(center, Vector3.forward, leftSide? 5.0f : -5.0f);
         //MoveMan();
         if (leftSide ? (transform.rotation.eulerAngles.z > 89.0f) : (transform.rotation.eulerAngles.z < 271.0f))
@@ -142,7 +145,9 @@ public class CouchMove : MonoBehaviour
         anim.SetBool("Move", false);
         if (Mathf.Abs(topTargetPosition - transform.position.y)<0.25f)
         {
+            Chair.chair.SetSecondChairPosition(height, leftSide);
             Score.scoreComponent.IncreaseScore(1);
+            ContinueText.continueComponent.EnableText(true);
         }
         else
         {
@@ -150,30 +155,32 @@ public class CouchMove : MonoBehaviour
             Score.scoreComponent.ResetScore();
         }
         Couch.phase = Couch.movePhase.FinishIdle;
-
+        
     }
     void FinishIdle()
     {
-        ContinueText.continueComponent.EnableText(true);
         if (Input.touchCount > 0)
         {
             if (Input.GetTouch(0).phase == TouchPhase.Began)
             {
                 ContinueText.continueComponent.EnableText(false);
-                Couch.phase = Couch.movePhase.Reset;
                 Score.scoreComponent.Continue();
+                Chair.chair.SecondChair.SetActive(false);
+                Couch.phase = Couch.movePhase.Reset;
+                
             }
         }
     }
     void Overcome()
     {
-        Couch.phase = Couch.movePhase.Reset;
+        anim.SetBool("Move", false);
+        Score.scoreComponent.Finish();
         Score.scoreComponent.ResetScore();
+        Couch.phase = Couch.movePhase.FinishIdle;
     }
-
-    void MoveMan()
+    void OnTriggerEnter2D(Collider2D other)
     {
-        man.transform.position = transform.position - new Vector3(0.0f, height,0.0f);
-        man.transform.rotation = transform.rotation;
+        Couch.phase = Couch.movePhase.Overcome;
     }
+    
 }

@@ -14,9 +14,8 @@ public class ContinueText : MonoBehaviour
 	
 	public void EnableText(bool isEnabled)
     {
-        if (isEnabled)
-            continueComponent.gameObject.SetActive(true);
-        else
-            continueComponent.gameObject.SetActive(false);
+        //continueComponent.gameObject.transform.parent.gameObject.SetActive(isEnabled);
+        //Debug.Log(isEnabled);
+        gameObject.SetActive(isEnabled);
     }
 }
